@@ -2,7 +2,7 @@
 
 See it in action: https://qualuo.github.io/dijkstras-algorithm/
 
-Visualization of Dijkstra's pathfinding algorithm implemented in Unity with C#. Graph consists of a weighted grid. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter.
+Dijkstra's pathfinding algorithm visual implemented in Unity with C#. Graph consists of a weighted grid. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter. Black nodes are disconnected/impassable.
  
  
 Dijkstra's algorithm is used in pathfinding to find the shortest path from one node to every other node. These are the steps:
@@ -18,7 +18,7 @@ Dijkstra's algorithm is used in pathfinding to find the shortest path from one n
 Or in code: 
 
         // Dijkstra's Shortest Path Algorithm implementation (no priority queue)
-        void DSPA(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
+        void FindPathsDijkstra(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
           HashSet<GameObject> unvisited = new HashSet<GameObject>();
 
           foreach (List<GameObject> row in nodesGrid) {
