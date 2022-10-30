@@ -58,6 +58,7 @@ public class Node : MonoBehaviour {
             GetComponent<Renderer>().material.SetColor("_Color", new Color(0f, 0.8f, 0, 1));
             isColorable = false;
         }
+        transform.localScale = new Vector3(0.98f, 0.98f, 0.98f);
     }
     public void SetTarget() {
         if (GetComponent<Renderer>() != null) {
