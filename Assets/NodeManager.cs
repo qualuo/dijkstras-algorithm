@@ -43,7 +43,7 @@ public class NodeManager : MonoBehaviour {
             colorUpdateTime = colorUpdateTime - Time.deltaTime;
             if (colorUpdateTime <= 0) {
                 StartCoroutine(UpdateNodeColors());
-                colorUpdateTime = 0.2f;
+                colorUpdateTime = 0.4f;
             }
         }
             if (isTargetFound) {

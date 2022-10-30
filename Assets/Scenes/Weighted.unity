@@ -378,7 +378,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1697746477}
-  - component: {fileID: 1697746476}
   - component: {fileID: 1697746475}
   m_Layer: 0
   m_Name: Systems
@@ -401,18 +400,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   nodePrefab: {fileID: 894100149819833822, guid: 7b62cc7b8dd2c694aa14c29139b48fdf, type: 3}
   gridSize: 15
---- !u!114 &1697746476
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1697746474}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3b2b2887571b00e41bb62528ae06dc79, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &1697746477
 Transform:
   m_ObjectHideFlags: 0
