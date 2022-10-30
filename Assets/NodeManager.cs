@@ -13,6 +13,7 @@ public class NodeManager : MonoBehaviour {
     private GameObject nodeInitial;
     private GameObject nodeTarget;
     private List<GameObject> lines;
+    private float colorUpdateTime;
 
     void Start() {
         nodes = new List<List<GameObject>>();
@@ -39,11 +40,12 @@ public class NodeManager : MonoBehaviour {
             isInProgress = true;
             StartVisualization();
         } else if (isInProgress) {
-            foreach (List<GameObject> row in nodes) {
-                foreach (GameObject node in row) {
-                    node.GetComponent<Node>().AddVisColor(distMinFound);
-                }
+            colorUpdateTime = colorUpdateTime - Time.deltaTime;
+            if (colorUpdateTime <= 0) {
+                StartCoroutine(UpdateNodeColors());
+                colorUpdateTime = 0.2f;
             }
+        }
             if (isTargetFound) {
                 List<GameObject> targetPath = new List<GameObject>();
                 GameObject p = nodeTarget.GetComponent<Node>().GetPrev();
@@ -57,7 +59,16 @@ public class NodeManager : MonoBehaviour {
 
                 StartCoroutine(RestartAfterSeconds(5));
             }
+    }
+
+
+    IEnumerator UpdateNodeColors() {
+        foreach (List<GameObject> row in nodes) {
+            foreach (GameObject node in row) {
+                node.GetComponent<Node>().AddVisColor(distMinFound);
+            }
         }
+        yield return null;
     }
 
     IEnumerator RestartAfterSeconds(float time) {
@@ -94,29 +105,33 @@ public class NodeManager : MonoBehaviour {
         // Choose start and end points
         nodeInitial = nodes[Random.Range(0, gridSize)][Random.Range(0, gridSize)];
         nodeInitial.GetComponent<Node>().SetInitial();
-        nodeTarget = nodes[Random.Range(0, gridSize)][Random.Range(0, gridSize)];
+        nodeTarget = nodeInitial;
         if (nodeTarget.Equals(nodeInitial)) {
-            while (nodeTarget.Equals(nodeInitial)) {
-                nodeTarget = nodes[Random.Range(0, gridSize)][Random.Range(0, gridSize)];
+            while (nodeTarget.Equals(nodeInitial)) { // Guarantee target is not same as initial
+                nodeTarget = nodes[Random.Range(0, gridSize)][Random.Range(0, gridSize)]; 
             }
         } 
         nodeTarget.GetComponent<Node>().SetTarget();
 
-        StartCoroutine(DSPA(nodes, nodeInitial));
+        StartCoroutine(FindPathsDijkstras(nodes, nodeInitial));
     }
 
-    /*
-     * Dijkstra's Shortest Path Algorithm
-     */
-    IEnumerator DSPA(List<List<GameObject>> nodesGrid, GameObject nodeInitial) { // without Priority Queue
+    // Dijkstra's Shortest Path Algorithm without priority queue
+    IEnumerator FindPathsDijkstras(List<List<GameObject>> nodesGrid, GameObject nodeInitial) { 
         HashSet<GameObject> unvisited = new HashSet<GameObject>();
 
         foreach (List<GameObject> row in nodesGrid) {
             foreach (GameObject node in row) {
-                unvisited.Add(node);
                 if (node.Equals(nodeInitial)) {
+                    unvisited.Add(node);
                     Node n = node.GetComponent<Node>();
-                    n.AddDist(0);
+                    n.SetDist(0);
+                } else if (node.Equals(nodeTarget)) {
+                    unvisited.Add(node);
+                } else if (Random.Range(1,10) <= 1) { // 10% chance to not be excluded from graph
+                    node.GetComponent<Node>().SetImpassableNode();
+                } else {
+                    unvisited.Add(node);
                 }
             }
         }
@@ -133,7 +148,10 @@ public class NodeManager : MonoBehaviour {
                 }
             }
             unvisited.Remove(nodeCurrent);
-            if (nodeCurrent.Equals(nodeTarget)) { 
+
+            if (nodeCurrent.GetComponent<Node>().GetPrev())
+                DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
+            if (nodeCurrent.Equals(nodeTarget)) {
                 isTargetFound = true;
                 break;
             }
@@ -146,31 +164,41 @@ public class NodeManager : MonoBehaviour {
                 Node nodeNeighbor = neighbor.GetComponent<Node>();
                 int nxtDist = node.GetTotalDist() + nodeNeighbor.GetWeight();
                 if (nxtDist < nodeNeighbor.GetTotalDist()) {
-                    nodeNeighbor.AddDist(nxtDist);
+                    nodeNeighbor.SetDist(nxtDist);
                     nodeNeighbor.SetPrev(nodeCurrent);
-                    DrawLineTentative(nodeCurrent.transform.position, nodeNeighbor.transform.position); // Visual
+                    DrawLineTentativePath(nodeCurrent.transform.position, nodeNeighbor.transform.position); // Visual
                 }
             }
         }
+        if (!isTargetFound) StartCoroutine(RestartAfterSeconds(5)); 
         yield return null;
     }
 
-    private void DrawLineTentative(Vector3 start, Vector3 end) {
+    private void DrawLineVisitedPath(Vector3 start, Vector3 end) {
         GameObject o = new GameObject("Line");
         lines.Add(o);
         LineRenderer lr = o.AddComponent<LineRenderer>();
-        Material m = new Material(Shader.Find("Standard"));
+        Material m = new Material(Shader.Find("Unlit/Color"));
         lr.material = m;
         lr.startColor = Color.black; lr.endColor = Color.black;
-        lr.startWidth = 0.05f; lr.endWidth = 0.05f;
+        lr.startWidth = 0.075f; lr.endWidth = 0.075f;
         lr.SetPosition(0, start); lr.SetPosition(1, end);
     }
-
+    private void DrawLineTentativePath(Vector3 start, Vector3 end) {
+        GameObject o = new GameObject("Line");
+        lines.Add(o);
+        LineRenderer lr = o.AddComponent<LineRenderer>();
+        Material m = new Material(Shader.Find("Unlit/Color"));
+        lr.material = m;
+        lr.startColor = Color.blue; lr.endColor = Color.blue;
+        lr.startWidth = 0.005f; lr.endWidth = 0.005f;
+        lr.SetPosition(0, start); lr.SetPosition(1, end);
+    }
     private void DrawLineTargetPath(Vector3 start, Vector3 end) {
         GameObject o = new GameObject("Line");
         lines.Add(o);
         LineRenderer lr = o.AddComponent<LineRenderer>();
-        Material m = new Material(Shader.Find("Standard"));
+        Material m = new Material(Shader.Find("Unlit/Color"));
         lr.material = m;
         lr.startColor = Color.green; lr.endColor = Color.green;
         lr.startWidth = 0.2f; lr.endWidth = 0.2f;

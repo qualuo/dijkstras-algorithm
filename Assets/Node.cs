@@ -6,9 +6,9 @@ public class Node : MonoBehaviour {
 
     public int weight;
 
-    private List<GameObject> neighbors; // Connected nodes
-    public GameObject prev; // Previous node on path to target
-    private List<int> dist;
+    private List<GameObject> neighbors; // Connected nodes/vertices
+    public GameObject prev;             // Previous node on path to target
+    private int dist;                   // Cost/distance to reach this node
     private bool isColorable;
     private readonly int weightMax = 1000;
 
@@ -16,7 +16,7 @@ public class Node : MonoBehaviour {
         weight = Random.Range(1, weightMax + 1);
         neighbors = new List<GameObject>();
         prev = null;
-        dist = new List<int>();
+        dist = int.MaxValue;
         isColorable = true;
 
         if (GetComponent<Renderer>() != null) {
@@ -40,19 +40,14 @@ public class Node : MonoBehaviour {
     }
 
     public int GetTotalDist() {
-        if (dist.Count == 0) {
-            return int.MaxValue;
-        }
-        int d = 0;
-        foreach (int i in dist) d += i;
-        return d;
+        return dist;
     }
 
     public void AddNeighbor(GameObject n) {
         neighbors.Add(n);
     }
-    public void AddDist(int d) {
-        dist.Add(d);
+    public void SetDist(int d) {
+        dist = d;
     }
     public void SetPrev(GameObject n) {
         prev = n;
@@ -60,25 +55,24 @@ public class Node : MonoBehaviour {
 
     public void SetInitial() {
         if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0f, 0.98f, 0, 1));
+            GetComponent<Renderer>().material.SetColor("_Color", new Color(0f, 0.8f, 0, 1));
             isColorable = false;
         }
     }
     public void SetTarget() {
         if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(1, 0, 0, 1));
+            GetComponent<Renderer>().material.SetColor("_Color", new Color(0.8f, 0, 0, 1));
             isColorable = false;
         }
     }
     public void SetImpassableNode() {
         if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0.4f, 0.4f, 0.4f, 1));
+            GetComponent<Renderer>().material.SetColor("_Color", new Color(0.1f, 0.1f, 0.1f, 1));
             isColorable = false;
         }
     }
     public void SetTargetPathNode() {
         if (GetComponent<Renderer>() != null) {
-            //Color c = GetComponent<Renderer>().material.color;
             GetComponent<Renderer>().material.SetColor("_Color", new Color(0.8f, 0.8f , 0, 1));
             isColorable = false;
         }
@@ -88,7 +82,7 @@ public class Node : MonoBehaviour {
         if (!isColorable) return;
         if (GetTotalDist() == int.MaxValue) return;
         if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0, MapRange(GetTotalDist(), 0, min, 1f, 0.4f), 0, 1));
+            GetComponent<Renderer>().material.SetColor("_Color", new Color(0, MapRange(GetTotalDist(), 0, min, 0.8f, 0.5f), 0, 1));
         }
     }
 
