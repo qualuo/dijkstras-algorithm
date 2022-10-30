@@ -1,26 +1,47 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NodeManager : MonoBehaviour {
-    public GameObject nodePrefab;
-    public int gridSize = 15;
+    public GameObject nodePrefab;           // Node used in graph
+    public int gridSize = 15;               // Square grid/graph
 
-    private List<List<GameObject>> nodes;
-    private int distMinFound;
-    private bool isInProgress;
-    private bool isTargetFound;
-    private GameObject nodeInitial;
-    private GameObject nodeTarget;
-    private List<GameObject> lines;
-    private float colorUpdateTime;
+    public Slider iterationSpeedSlider;
+    private bool isListenerInit;
+
+    private List<List<GameObject>> nodes;   // Graph of 2D grid
+    private GameObject nodeInitial;         // Starting node
+    private GameObject nodeTarget;          // End node
+    private List<GameObject> lines;         // Collection of lines (so they can be destroyed)
+
+    private float iterationsPerSecond;      // Iteration delay
+    private bool isInProgress;              // True while pathfinding in progress
+    private bool isTargetFound;             // True when algorithm has found target
+    private float colorUpdateTime;          // Color update interval
+    private float inProgressTime;           // Duration of current search
+    private int distMinFound;               // Shortest distance of unvisited nodes (used for animation)
 
     void Start() {
+
+        if (iterationSpeedSlider && !isListenerInit) { 
+            iterationSpeedSlider.onValueChanged.AddListener(delegate { SliderChange(); });
+            isListenerInit = true;
+        }
+
         nodes = new List<List<GameObject>>();
-        distMinFound = 0;
+        lines = new List<GameObject>();
+
+        if (iterationSpeedSlider) {
+            iterationsPerSecond = iterationSpeedSlider.value; 
+        } else {
+            iterationsPerSecond = 10f;
+        }
         isTargetFound = false;
         isInProgress = false;
-        lines = new List<GameObject>();
+        colorUpdateTime = 0;
+        inProgressTime = 0;
+        distMinFound = 0;
 
         // Set up grid (graph)
         for (int col = 0; col < gridSize; col++) {
@@ -33,6 +54,10 @@ public class NodeManager : MonoBehaviour {
         }
     }
 
+    public void SliderChange() {
+        iterationsPerSecond = iterationSpeedSlider.value;
+    }
+
     // Update is called once per frame
     void Update() {
 
@@ -40,10 +65,12 @@ public class NodeManager : MonoBehaviour {
             isInProgress = true;
             StartVisualization();
         } else if (isInProgress) {
-            colorUpdateTime = colorUpdateTime - Time.deltaTime;
+            float delta = Time.deltaTime;
+            inProgressTime += delta;
+            colorUpdateTime = colorUpdateTime - delta;
             if (colorUpdateTime <= 0) {
                 StartCoroutine(UpdateNodeColors());
-                colorUpdateTime = 0.4f;
+                colorUpdateTime = 0.05f;
             }
         }
             if (isTargetFound) {
@@ -57,7 +84,7 @@ public class NodeManager : MonoBehaviour {
                     p = p.GetComponent<Node>().GetPrev();
                 }
 
-                StartCoroutine(RestartAfterSeconds(5));
+                StartCoroutine(RestartAfterSeconds(Mathf.Min(5,inProgressTime*3)));
             }
     }
 
@@ -138,6 +165,9 @@ public class NodeManager : MonoBehaviour {
 
         GameObject nodeCurrent = nodeInitial;
         while (unvisited.Count > 0) {
+            if (nodeCurrent.GetComponent<Node>().GetPrev())
+                DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
+
             int min = int.MaxValue;
             foreach (GameObject o in unvisited) {
                 int d = o.GetComponent<Node>().GetTotalDist();
@@ -149,14 +179,12 @@ public class NodeManager : MonoBehaviour {
             }
             unvisited.Remove(nodeCurrent);
 
-            if (nodeCurrent.GetComponent<Node>().GetPrev())
-                DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
             if (nodeCurrent.Equals(nodeTarget)) {
                 isTargetFound = true;
                 break;
             }
 
-            yield return new WaitForSeconds(0.02f); // Delay for visual purposes
+            yield return new WaitForSeconds(1/iterationsPerSecond); // Delay for visual purposes
             if (nodeCurrent == null) break;
 
             Node node = nodeCurrent.GetComponent<Node>();
@@ -166,7 +194,7 @@ public class NodeManager : MonoBehaviour {
                 if (nxtDist < nodeNeighbor.GetTotalDist()) {
                     nodeNeighbor.SetDist(nxtDist);
                     nodeNeighbor.SetPrev(nodeCurrent);
-                    DrawLineTentativePath(nodeCurrent.transform.position, nodeNeighbor.transform.position); // Visual
+                    //DrawLineTentativePath(nodeCurrent.transform.position, nodeNeighbor.transform.position); // Visual
                 }
             }
         }

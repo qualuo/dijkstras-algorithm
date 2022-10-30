@@ -70,6 +70,7 @@ public class Node : MonoBehaviour {
             GetComponent<Renderer>().material.SetColor("_Color", new Color(0.1f, 0.1f, 0.1f, 1));
             isColorable = false;
         }
+        transform.localScale = new Vector3(0.98f, 0.98f, 0.98f);
     }
     public void SetTargetPathNode() {
         if (GetComponent<Renderer>() != null) {
@@ -82,7 +83,8 @@ public class Node : MonoBehaviour {
         if (!isColorable) return;
         if (GetTotalDist() == int.MaxValue) return;
         if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0, MapRange(GetTotalDist(), 0, min, 0.8f, 0.5f), 0, 1));
+            Renderer r = GetComponent<Renderer>();
+            r.material.SetColor("_Color", new Color(0, Mathf.Lerp(r.material.color.g, MapRange(GetTotalDist(), 0, min, 0.8f, 0.5f), 0.1f ), 0, 1));
         }
     }
 
