@@ -3,7 +3,9 @@
 ### See it in action: https://qualuo.github.io/dijkstras-algorithm/
 
 Dijkstra's pathfinding algorithm implemented in Unity with C#. Graph consists of a weighted grid. Red is target, green is starting point. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter. Black nodes are disconnected/impassable. New scenarios are procedurally generated.
- 
+
+![Showcase](./Images/pathfinding.gif)
+
 ## Algorithm
 
 Dijkstra's algorithm is used in pathfinding to find the shortest path from one node to every other node. These are the steps:
