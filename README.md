@@ -2,11 +2,7 @@
 
 ### See it in action: https://qualuo.github.io/dijkstras-algorithm/
 
-Dijkstra's pathfinding algorithm implemented in Unity with C#. Graph consists of a weighted grid. Red is target, green is starting point. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter. Black nodes are disconnected/impassable. New scenarios are continuously generated.
-
-#### Why doesn't it stop when the first connection to the target is found?
-
-This is because the algorithm guarantees that the shortest path is found. The first connection is only tentative and may not be the shortest path considering there are other paths that could be shorter. The algorithm continues to the next unvisited node that is the shortest distance away from the starting point until finally the next shortest node is the target.
+Dijkstra's pathfinding algorithm implemented in Unity with C#. Graph consists of a weighted grid. Red is target, green is starting point. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter. Black nodes are disconnected/impassable. New scenarios are procedurally generated.
  
 ## Algorithm
 
