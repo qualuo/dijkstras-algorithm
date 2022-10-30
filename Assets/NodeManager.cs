@@ -107,18 +107,6 @@ public class NodeManager : MonoBehaviour {
 
     /*
      * Dijkstra's Shortest Path Algorithm
-     *
-     * Dijkstra's algorithm is used to find the shortest path from one node to every other node. These are the steps:
-     * 1. Choose a starting node. This will be the first 'current' node. (Passed into function.)
-     * 2. Add all nodes to a set. This set contains all 'unvisited' nodes.
-     * 3. Make an array, set starting node's distance value to 0, and INFINITY (max value) for all others. 
-     *    This value ('distance') is the shortest distance to the node from starting node.
-     * 4. Set the 'current' node to the one with lowest 'distance' in the unvisited set.
-     * 5. Remove 'current' node from set of unvisited nodes.
-     * 6. For every neighbor of current node: if sum of 'distance' to the neighbor is less than the neighbor's current 'distance', 
-     *    save the smaller value (shorter distance), and set a pointer/reference to neighbor.
-     * 7. Repeat from 4 until unvisited set is empty.
-     * 
      */
     IEnumerator DSPA(List<List<GameObject>> nodesGrid, GameObject nodeInitial) { // without Priority Queue
         HashSet<GameObject> unvisited = new HashSet<GameObject>();
@@ -150,7 +138,7 @@ public class NodeManager : MonoBehaviour {
                 break;
             }
 
-            yield return new WaitForSeconds(0.05f); // Delay for visual purposes
+            yield return new WaitForSeconds(0.02f); // Delay for visual purposes
             if (nodeCurrent == null) break;
 
             Node node = nodeCurrent.GetComponent<Node>();
