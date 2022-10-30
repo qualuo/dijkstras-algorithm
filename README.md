@@ -1,8 +1,9 @@
 # dijkstras-algorithm
 
+https://qualuo.github.io/dijkstras-algorithm/
+
 Visualization of Dijkstra's algorithm implemented in Unity with C#. Graph consists of a weighted grid. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter.
  
-https://qualuo.github.io/dijkstras-algorithm/
  
 Dijkstra's algorithm is used to find the shortest path from one node to every other node, following these steps:
 1. Choose a starting node. This will be the first 'current' node. (Passed into function.)
@@ -13,7 +14,9 @@ Dijkstra's algorithm is used to find the shortest path from one node to every ot
 6. For every neighbor of current node: if sum of 'distance' to the neighbor is less than the neighbor's current 'distance', save the smaller value (shorter distance), and set a pointer/reference to neighbor.
 7. Repeat from 4 until unvisited set is empty.
 
-   
+
+Or in code: 
+
         // Dijkstra's Shortest Path Algorithm implementation (no priority queue)
         void DSPA(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
           HashSet<GameObject> unvisited = new HashSet<GameObject>();
