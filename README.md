@@ -1,11 +1,11 @@
 # Pathfinding - Dijkstra's Algorithm
 
-https://qualuo.github.io/dijkstras-algorithm/
+See it in action: https://qualuo.github.io/dijkstras-algorithm/
 
 Visualization of Dijkstra's pathfinding algorithm implemented in Unity with C#. Graph consists of a weighted grid. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter.
  
  
-Dijkstra's algorithm is used to find the shortest path from one node to every other node, following these steps:
+Dijkstra's algorithm is used in pathfinding to find the shortest path from one node to every other node. These are the steps:
 1. Choose a starting node. This will be the first 'current' node. (Passed into function.)
 2. Add all graph nodes to a set. This set contains all 'unvisited' nodes.
 3. Set starting node's distance value to 0, and INFINITY (max value) for all others. This value ('distance') is the shortest distance to the node from starting node.
