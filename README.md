@@ -26,7 +26,7 @@ Or in code:
                   unvisited.Add(node);
                   if (node.Equals(nodeInitial)) {
                       Node n = node.GetComponent<Node>();
-                      n.AddDist(0);
+                      n.SetDist(0);
                   }
               }
           }
@@ -54,7 +54,7 @@ Or in code:
                   Node nodeNeighbor = neighbor.GetComponent<Node>();
                   int nxtDist = node.GetTotalDist() + nodeNeighbor.GetWeight();
                   if (nxtDist < nodeNeighbor.GetTotalDist()) {
-                      nodeNeighbor.AddDist(nxtDist);
+                      nodeNeighbor.SetDist(nxtDist);
                       nodeNeighbor.SetPrev(nodeCurrent);
                   }
               }
