@@ -1,8 +1,8 @@
-# dijkstras-algorithm
+# Pathfinding - Dijkstra's Algorithm
 
 https://qualuo.github.io/dijkstras-algorithm/
 
-Visualization of Dijkstra's algorithm implemented in Unity with C#. Graph consists of a weighted grid. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter.
+Visualization of Dijkstra's pathfinding algorithm implemented in Unity with C#. Graph consists of a weighted grid. Node size indicates weight. Longer distance paths are darker, while short and easy paths are brighter.
  
  
 Dijkstra's algorithm is used to find the shortest path from one node to every other node, following these steps:
