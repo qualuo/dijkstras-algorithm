@@ -10,6 +10,7 @@ public class Node : MonoBehaviour {
     public GameObject prev;             // Previous node on path to target
     private int dist;                   // Cost/distance to reach this node
     private bool isColorable;
+    private bool isFrontier;            // True if node is a neighbor but not yet visited
     private readonly int weightMax = 1000;
 
     void Start() {
@@ -18,10 +19,10 @@ public class Node : MonoBehaviour {
         prev = null;
         dist = int.MaxValue;
         isColorable = true;
+        isFrontier = false;
 
-        if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0.8f, 0.8f, 0.8f, 1));
-        }
+        if (GetComponent<Renderer>() == null) return;
+        GetComponent<Renderer>().material.SetColor("_Color", new Color(0.8f, 0.8f, 0.8f, 1));
         float v = MapRange(weight, 1, weightMax, 0.6f, 0.98f);
         transform.localScale = new Vector3(v, v, v);
     }
@@ -42,6 +43,9 @@ public class Node : MonoBehaviour {
     public int GetTotalDist() {
         return dist;
     }
+    public bool GetIsFrontier() {
+        return isFrontier;
+    }
 
     public void AddNeighbor(GameObject n) {
         neighbors.Add(n);
@@ -52,41 +56,45 @@ public class Node : MonoBehaviour {
     public void SetPrev(GameObject n) {
         prev = n;
     }
+    public void SetIsFrontier(bool b) {
+        isFrontier = b;
+    }
 
     public void SetInitial() {
-        if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0f, 0.8f, 0, 1));
-            isColorable = false;
-        }
+        if (GetComponent<Renderer>() == null) return;
+        GetComponent<Renderer>().material.SetColor("_Color", new Color(0f, 0.8f, 0, 1));
+        isColorable = false;
         transform.localScale = new Vector3(0.98f, 0.98f, 0.98f);
     }
     public void SetTarget() {
-        if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0.8f, 0, 0, 1));
-            isColorable = false;
-        }
+        if (GetComponent<Renderer>() == null) return;
+        GetComponent<Renderer>().material.SetColor("_Color", new Color(0.8f, 0, 0, 1));
+         isColorable = false;
     }
     public void SetImpassableNode() {
-        if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0.1f, 0.1f, 0.1f, 1));
-            isColorable = false;
-        }
+        if (GetComponent<Renderer>() == null) return;
+        GetComponent<Renderer>().material.SetColor("_Color", new Color(0.1f, 0.1f, 0.1f, 1));
+        isColorable = false;
         transform.localScale = new Vector3(0.98f, 0.98f, 0.98f);
     }
     public void SetTargetPathNode() {
-        if (GetComponent<Renderer>() != null) {
-            GetComponent<Renderer>().material.SetColor("_Color", new Color(0.8f, 0.8f , 0, 1));
-            isColorable = false;
-        }
-
-        }
-    public void AddVisColor(int min) {
+        if (GetComponent<Renderer>() == null) return;
+        GetComponent<Renderer>().material.SetColor("_Color", new Color(0.9f, 0.8f, 0, 1));  
+        isColorable = false;
+    }
+    public void SetVisitedNode(int min) {
         if (!isColorable) return;
         if (GetTotalDist() == int.MaxValue) return;
-        if (GetComponent<Renderer>() != null) {
-            Renderer r = GetComponent<Renderer>();
-            r.material.SetColor("_Color", new Color(0, Mathf.Lerp(r.material.color.g, MapRange(GetTotalDist(), 0, min, 0.8f, 0.5f), 0.1f ), 0, 1));
-        }
+        if (GetComponent<Renderer>() == null) return;
+        Renderer r = GetComponent<Renderer>();
+        r.material.SetColor("_Color", new Color(0, MapRange(GetTotalDist(), 0, min, 0.7f, 0.4f), 0, 1));
+    }
+    public void SetFrontierNode(int min) {
+        if (!isColorable) return;
+        if (GetTotalDist() == int.MaxValue) return;
+        if (GetComponent<Renderer>() == null) return;
+        Renderer r = GetComponent<Renderer>();
+        r.material.SetColor("_Color", new Color(0, 0.4f, 0.6f, 1));
     }
 
 }
