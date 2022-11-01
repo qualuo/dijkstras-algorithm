@@ -260,9 +260,9 @@ public class NodeManager : MonoBehaviour {
         GameObject o = new GameObject("Line");
         lines.Add(o);
         LineRenderer lr = o.AddComponent<LineRenderer>();
-        Material m = new Material(Shader.Find("Standard"));
+        Material m = new Material(Shader.Find("Unlit/Color"));
         lr.material = m;
-        m.SetColor("_Color", new Color(0, 0.6f, 0, 1));
+        //m.SetColor("_Color", new Color(0, 0.6f, 0, 1));
         lr.startColor = Color.black; lr.endColor = Color.black;
         lr.startWidth = 0.075f; lr.endWidth = 0.075f;
         lr.SetPosition(0, start); lr.SetPosition(1, end);
