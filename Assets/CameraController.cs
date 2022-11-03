@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CameraController : MonoBehaviour
-{
+public class CameraController : MonoBehaviour {
 
     public NodeManager observee;
     private float targetCoord;
@@ -15,8 +14,7 @@ public class CameraController : MonoBehaviour
     public Button plusZoomButton;
 
 
-    void Start()
-    {
+    void Start() {
         camera = GetComponent<Camera>();
 
         if (minusZoomButton) {

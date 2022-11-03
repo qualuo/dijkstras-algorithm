@@ -1,30 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class NodeManager : MonoBehaviour {
     public GameObject nodePrefab;           // Node used in graph
 
-    public Slider gridSizeSlider;
     private int gridSize;                   // Square grid/graph
-    private bool isGridSizeSliderInit;
-    private bool isGridSizeChanged;
-
-    public Toggle visToggle;
-    private bool isVisToggleInit;
     private bool isVisualizing;
-
-    public Slider iterationSpeedSlider;
-    private bool isIPSListenerInit;
-
+    private float iterationsPerSecond;      // Iteration delay
 
     private List<List<GameObject>> nodes;   // Graph of 2D grid
     private List<GameObject> lines;         // Collection of lines (so they can be destroyed)
     private GameObject nodeInitial;         // Starting node
     private GameObject nodeTarget;          // End node
 
-    private float iterationsPerSecond; // Iteration delay
     private bool isRoundInProgress;         // A round is a whole beginning to end, then there is the reset phase
     private bool isFindingPaths;            // True while algorithm is running
     private bool isTargetFound;             // True when algorithm has found target
@@ -34,39 +23,12 @@ public class NodeManager : MonoBehaviour {
     private int iterations;
 
     void Start() {
-
-        gridSizeSlider.interactable = false;
-        if (gridSizeSlider && !isGridSizeSliderInit) {
-            gridSizeSlider.onValueChanged.AddListener(delegate { SliderGridSizeChange(); });
-            isGridSizeSliderInit = true;
-        }
-        if (iterationSpeedSlider && !isIPSListenerInit) { 
-            iterationSpeedSlider.onValueChanged.AddListener(delegate { SliderIPSChange(); });
-            isIPSListenerInit = true;
-        }
-        if (visToggle && !isVisToggleInit) {
-            visToggle.onValueChanged.AddListener(delegate { VisToggleChange(); });
-            isVisToggleInit = true;
-        }
+        if (gridSize == 0) gridSize = 12;
+        if (iterationsPerSecond == 0) iterationsPerSecond = 10;
 
         nodes = new List<List<GameObject>>();
         lines = new List<GameObject>();
 
-        if (gridSizeSlider) {
-            gridSize = (int) gridSizeSlider.value;
-        } else {
-            gridSize = 12;
-        }
-        if (visToggle) {
-            isVisualizing = visToggle.isOn;
-        } else {
-            isVisualizing = true;
-        }
-        if (iterationSpeedSlider) {
-            iterationsPerSecond = iterationSpeedSlider.value; 
-        } else {
-            iterationsPerSecond = 16f;
-        }
         isTargetFound = false;
         colorUpdateTime = 0;
         inProgressTime = 0;
@@ -80,6 +42,7 @@ public class NodeManager : MonoBehaviour {
         yield return new WaitUntil(SetupGrid);
         yield return new WaitUntil(PopulateNeighbors);
         yield return new WaitUntil(SetupStartEndNodes);
+        yield return new WaitUntil(DeleteRandomNeighbors);
         StartCoroutine(FindPathsDijkstras(nodes, nodeInitial));
     }
 
@@ -114,8 +77,8 @@ public class NodeManager : MonoBehaviour {
     IEnumerator RestartAfterSeconds(float time) {
         isRoundInProgress = false;
         isTargetFound = false;
-        gridSizeSlider.interactable = true;
         StartCoroutine(UpdateNodeColors());
+
         yield return new WaitForSeconds(time);
 
         foreach (List<GameObject> row in nodes) {
@@ -169,8 +132,27 @@ public class NodeManager : MonoBehaviour {
         nodeTarget.GetComponent<Node>().SetTarget();
         return true;
     }
+    bool DeleteRandomNeighbors() {
+        int difficulty = Random.Range(3,10); // Random exclusion threshold
+        for (int col = gridSize - 1; col >= 0; col--) {
+            for (int row = gridSize - 1; row >= 0; row--) {
+                Node n = nodes[col][row].GetComponent<Node>();
+                if (n.gameObject.Equals(nodeInitial) || n.gameObject.Equals(nodeTarget)) continue;
+                bool willKeep = difficulty > Random.Range(0,10) ? true : false; // Chance to be excluded 
+                if (!willKeep) {
+                    n.GetComponent<Node>().SetImpassableNode();
+                    foreach (GameObject neighbor in n.GetNeighbors()) {
+                        neighbor.GetComponent<Node>().GetNeighbors().Remove(n.gameObject);
+                    }
+                    nodes[col].Remove(n.gameObject);
+                    Destroy(n.gameObject);
+                }
+            }
+        }
+        return true;
+    }
 
-    // Dijkstra's Shortest Path Algorithm without priority queue
+    // Dijkstra's Shortest Path Algorithm
     IEnumerator FindPathsDijkstras(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
         isFindingPaths = true;
         HashSet<GameObject> unvisited = new HashSet<GameObject>();
@@ -179,12 +161,7 @@ public class NodeManager : MonoBehaviour {
             foreach (GameObject node in row) {
                 if (node.Equals(nodeInitial)) {
                     unvisited.Add(node);
-                    Node n = node.GetComponent<Node>();
-                    n.SetDist(0);
-                } else if (node.Equals(nodeTarget)) {
-                    unvisited.Add(node);
-                } else if (Random.Range(0, 10) < Random.Range(0, 9)) { // Chance to be excluded AND random exclusion threshold
-                    node.GetComponent<Node>().SetImpassableNode();
+                    node.GetComponent<Node>().SetDist(0);
                 } else {
                     unvisited.Add(node);
                 }
@@ -206,7 +183,7 @@ public class NodeManager : MonoBehaviour {
             foreach (GameObject o in unvisited) {
                 Node n = o.GetComponent<Node>();
                 int dist = n.GetTotalDist();
-                if (dist <= min) {
+                if (dist < min) {
                     min = n.GetTotalDist();
                     minFoundDist = min; // Visual purpose
                     nodeCurrent = o;
@@ -238,8 +215,10 @@ public class NodeManager : MonoBehaviour {
             }
             iterations++;
         }
-        if (!isTargetFound) StartCoroutine(RestartAfterSeconds(5));
         isFindingPaths = false;
+        if (!isTargetFound) {
+            minFoundDist = int.MaxValue;
+            StartCoroutine(RestartAfterSeconds(5)); }
 
         if (isTargetFound) {
             List<GameObject> targetPath = new List<GameObject>();
@@ -307,15 +286,15 @@ public class NodeManager : MonoBehaviour {
     public bool GetIsVisualizing() {
         return isVisualizing;
     }
+    public void SetGridSize(int v) {
+        if (isRoundInProgress) return;
+        gridSize = v;
+    }
+    public void SetIteratonsPerSecond(int v) {
+        iterationsPerSecond = v;
+    }
+    public void SetIsVisualizing(bool v) {
+        isVisualizing = v;
+    }
 
-    public void SliderGridSizeChange() {
-        gridSize = (int)gridSizeSlider.value;
-    }
-    public void SliderIPSChange() {
-        iterationsPerSecond = iterationSpeedSlider.value;
-    }
-    public void VisToggleChange() {
-        isVisualizing = visToggle.isOn;
-        iterationSpeedSlider.gameObject.SetActive(isVisualizing);
-    }
 }
