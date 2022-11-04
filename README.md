@@ -1,4 +1,4 @@
-# Pathfinding - Dijkstra's Algorithm
+# Pathfinding Visualization - Dijkstra's Algorithm
 
 ### See it in action: https://qualuo.github.io/dijkstras-algorithm/
 
