@@ -272,7 +272,7 @@ public class NodeManager : MonoBehaviour {
                 if (nxtDist < nodeNeighbor.GetTotalDist()) {
                     nodeNeighbor.SetDist(nxtDist);
                     nodeNeighbor.SetPrev(nodeCurrent);
-                    unvisited.UpdatePriority(neighbor, nxtDist);
+                    if (unvisited.Contains(neighbor)) unvisited.UpdatePriority(neighbor, nxtDist);
                     nodeNeighbor.SetIsFrontier(true); // Visual purpose
                 }
             }
