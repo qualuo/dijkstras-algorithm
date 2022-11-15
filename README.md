@@ -66,3 +66,7 @@ Looks something like this in code:
               }
           }
        }
+       
+       
+## Comments
+Dijkstra's algorithm was originally implemented with its simplest form, using a set. This could be made more efficient by using a priority queue (aka binary heap) to sort the frontier nodes for faster access. A* was also added because of its popularity and generally performs better than Dijkstra.
