@@ -18,6 +18,13 @@ public class UIController : MonoBehaviour {
     public Toggle visToggle;
     public UnityEvent<bool> visToggleEvent;
 
+    public TMP_Dropdown algoDropdown;
+    public UnityEvent<int> algoDropdownEvent;
+
+    public Toggle randomWeightsToggle;
+    public UnityEvent<bool> randomWeightsToggleEvent;
+
+
     public NodeManager nodeManager;
     public TextMeshProUGUI playTMP;
     public TextMeshProUGUI distanceTMP;
@@ -30,11 +37,16 @@ public class UIController : MonoBehaviour {
         gridSizeSliderEvent.Invoke((int)gridSizeSlider.value);
         iterationSpeedSliderEvent.Invoke((int)iterationSpeedSlider.value);
         visToggleEvent.Invoke(visToggle.isOn);
+        algoDropdownEvent.Invoke((int)algoDropdown.value);
+        randomWeightsToggleEvent.Invoke(randomWeightsToggle.isOn);
 
-        playToggle.onValueChanged.AddListener(delegate { PlayToggleChange(); });
-        gridSizeSlider.onValueChanged.AddListener(delegate { SliderGridSizeChange(); });
-        iterationSpeedSlider.onValueChanged.AddListener(delegate { SliderIPSChange(); });
-        visToggle.onValueChanged.AddListener(delegate { VisToggleChange(); });
+        playToggle.onValueChanged.AddListener(delegate { OnPlayToggleChange(); });
+        gridSizeSlider.onValueChanged.AddListener(delegate { OnSliderGridSizeChange(); });
+        iterationSpeedSlider.onValueChanged.AddListener(delegate { OnSliderIPSChange(); });
+        visToggle.onValueChanged.AddListener(delegate { OnVisToggleChange(); });
+        algoDropdown.onValueChanged.AddListener(delegate { OnAlgoDropdownChange(); });
+        randomWeightsToggle.onValueChanged.AddListener(delegate { OnRandomWeightsToggleChange(); });
+
     }
 
     void Update() {
@@ -51,22 +63,7 @@ public class UIController : MonoBehaviour {
 
         iterationsTMP.text = nodeManager.GetIterations().ToString();
     }
-    public void SliderGridSizeChange() {
-        int v = (int) gridSizeSlider.value;
-        gridSizeSliderEvent.Invoke(v);
-        gridSizeTMP.text = v + "x" + v;
-    }
-    public void SliderIPSChange() {
-        int v = (int) iterationSpeedSlider.value;
-        iterationSpeedSliderEvent.Invoke(v);
-        iterationsPSTMP.text = v.ToString();
-    }
-    public void VisToggleChange() {
-        bool isOn = visToggle.isOn;
-        visToggleEvent.Invoke(isOn);
-        iterationSpeedSlider.gameObject.SetActive(isOn);
-    }
-    public void PlayToggleChange() {
+    public void OnPlayToggleChange() {
         bool isOn = playToggle.isOn;
         if (isOn) {
             Time.timeScale = 1.0f;
@@ -75,5 +72,28 @@ public class UIController : MonoBehaviour {
             Time.timeScale = 0.0f;
             playTMP.text = "Paused";
         }
+    }
+    public void OnSliderGridSizeChange() {
+        int v = (int) gridSizeSlider.value;
+        gridSizeSliderEvent.Invoke(v);
+        gridSizeTMP.text = v + "x" + v;
+    }
+    public void OnSliderIPSChange() {
+        int v = (int) iterationSpeedSlider.value;
+        iterationSpeedSliderEvent.Invoke(v);
+        iterationsPSTMP.text = v.ToString();
+    }
+    public void OnVisToggleChange() {
+        bool isOn = visToggle.isOn;
+        visToggleEvent.Invoke(isOn);
+        iterationSpeedSlider.gameObject.SetActive(isOn);
+    }
+    public void OnAlgoDropdownChange() {
+        int v = algoDropdown.value;
+        algoDropdownEvent.Invoke(v);
+    }
+    public void OnRandomWeightsToggleChange() {
+        bool isOn = randomWeightsToggle.isOn;
+        randomWeightsToggleEvent.Invoke(isOn);
     }
 }

@@ -1,26 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Priority_Queue;
 
 public class NodeManager : MonoBehaviour {
     public GameObject nodePrefab;           // Node used in graph
 
     private int gridSize;                   // Square grid/graph
-    private bool isVisualizing;
+    private bool isVisualizing;             // 
     private float iterationsPerSecond;      // Iteration delay
+    private int chosenAlgorithm;            // Which algorithm is used to search (index starts at 0)
 
     private List<List<GameObject>> nodes;   // Graph of 2D grid
     private List<GameObject> lines;         // Collection of lines (so they can be destroyed)
     private GameObject nodeInitial;         // Starting node
     private GameObject nodeTarget;          // End node
 
-    private bool isRoundInProgress;         // A round is a whole beginning to end, then there is the reset phase
+    private bool isRoundInProgress;         // A round is a whole beginning to end, after is the reset phase
     private bool isFindingPaths;            // True while algorithm is running
     private bool isTargetFound;             // True when algorithm has found target
     private float colorUpdateTime;          // Color update interval
     private float inProgressTime;           // Duration of current search
     private int minFoundDist;               // Shortest distance of visited nodes so far (used for animation)
-    private int iterations;
+    private int iterations;             
 
     void Start() {
         if (gridSize == 0) gridSize = 12;
@@ -43,7 +45,14 @@ public class NodeManager : MonoBehaviour {
         yield return new WaitUntil(PopulateNeighbors);
         yield return new WaitUntil(SetupStartEndNodes);
         yield return new WaitUntil(DeleteRandomNeighbors);
-        StartCoroutine(FindPathsDijkstras(nodes, nodeInitial));
+        if (chosenAlgorithm == 0)
+            StartCoroutine(FindPathsDijkstrasPriorityQueue(nodes, nodeInitial));
+        else if (chosenAlgorithm == 1)
+            StartCoroutine(FindPathsAStar(nodes, nodeInitial));
+        while (isFindingPaths) {
+            yield return null;
+        }
+        PostSearch();
     }
 
     void Update() {
@@ -133,7 +142,7 @@ public class NodeManager : MonoBehaviour {
         return true;
     }
     bool DeleteRandomNeighbors() {
-        int difficulty = Random.Range(3,10); // Random exclusion threshold
+        int difficulty = Random.Range(4,10); // Random exclusion threshold
         for (int col = gridSize - 1; col >= 0; col--) {
             for (int row = gridSize - 1; row >= 0; row--) {
                 Node n = nodes[col][row].GetComponent<Node>();
@@ -151,6 +160,22 @@ public class NodeManager : MonoBehaviour {
         }
         return true;
     }
+    void PostSearch() {
+        if (!isTargetFound) {
+            //minFoundDist = int.MaxValue;
+        } else if (isTargetFound) {
+            List<GameObject> targetPath = new List<GameObject>();
+            GameObject p = nodeTarget.GetComponent<Node>().GetPrev();
+            DrawLineTargetPath(nodeTarget.transform.position, p.transform.position); // Vis
+            while (!p.Equals(nodeInitial)) {
+                targetPath.Add(p);
+                p.GetComponent<Node>().SetTargetPathNode();
+                DrawLineTargetPath(p.transform.position, p.GetComponent<Node>().GetPrev().transform.position); // Vis
+                p = p.GetComponent<Node>().GetPrev();
+            }
+        }
+        StartCoroutine(RestartAfterSeconds(5));
+    }
 
     // Dijkstra's Shortest Path Algorithm
     IEnumerator FindPathsDijkstras(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
@@ -160,25 +185,14 @@ public class NodeManager : MonoBehaviour {
         foreach (List<GameObject> row in nodesGrid) {
             foreach (GameObject node in row) {
                 if (node.Equals(nodeInitial)) {
-                    unvisited.Add(node);
                     node.GetComponent<Node>().SetDist(0);
-                } else {
-                    unvisited.Add(node);
                 }
+                unvisited.Add(node);
             }
         }
 
-        StartCoroutine(IterateUnvisited(nodesGrid, nodeInitial, unvisited));
-        yield return null;
-    }
-
-    IEnumerator IterateUnvisited(List<List<GameObject>> nodesGrid, GameObject nodeInitial, HashSet<GameObject> unvisited) {
         GameObject nodeCurrent = nodeInitial;
         while (unvisited.Count > 0) {
-
-            if (nodeCurrent.GetComponent<Node>().GetPrev())
-                if (isVisualizing) DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
-
             int min = int.MaxValue;
             foreach (GameObject o in unvisited) {
                 Node n = o.GetComponent<Node>();
@@ -199,8 +213,9 @@ public class NodeManager : MonoBehaviour {
             if (isVisualizing) yield return new WaitForSeconds(1 / iterationsPerSecond); // Delay for visual purposes
             if (nodeCurrent == null) break; // Node can be destroyed during wait
 
-            if (min == int.MaxValue) break; // Unsolvable graph! Dijkstra's algorithm expects path to target
+            if (min == int.MaxValue) break; // Unsolvable graph! Dijkstra's algorithm requires path to target (Or graph is super massive, overflow)
 
+            if (nodeCurrent.GetComponent<Node>().GetPrev() && isVisualizing) DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
             Node node = nodeCurrent.GetComponent<Node>();
             node.SetIsFrontier(false);
             foreach (GameObject neighbor in node.GetNeighbors()) {
@@ -210,29 +225,118 @@ public class NodeManager : MonoBehaviour {
                     nodeNeighbor.SetDist(nxtDist);
                     nodeNeighbor.SetPrev(nodeCurrent);
                     nodeNeighbor.SetIsFrontier(true); // Visual purpose
-                    //if (isVisualizing) DrawLineTentativePath(nodeCurrent.transform.position, nodeNeighbor.transform.position); // Visual
                 }
             }
             iterations++;
         }
         isFindingPaths = false;
-        if (!isTargetFound) {
-            minFoundDist = int.MaxValue;
-            StartCoroutine(RestartAfterSeconds(5)); }
-
-        if (isTargetFound) {
-            List<GameObject> targetPath = new List<GameObject>();
-            GameObject p = nodeTarget.GetComponent<Node>().GetPrev();
-            DrawLineTargetPath(nodeTarget.transform.position, p.transform.position); // Vis
-            while (!p.Equals(nodeInitial)) {
-                targetPath.Add(p);
-                p.GetComponent<Node>().SetTargetPathNode();
-                DrawLineTargetPath(p.transform.position, p.GetComponent<Node>().GetPrev().transform.position); // Vis
-                p = p.GetComponent<Node>().GetPrev();
-            }
-            StartCoroutine(RestartAfterSeconds(5));
-        }
         yield return null;
+    }
+
+
+    // Dijkstra's Shortest Path Algorithm using Priority Queue
+    IEnumerator FindPathsDijkstrasPriorityQueue(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
+        isFindingPaths = true;
+        SimplePriorityQueue<GameObject, int> unvisited = new SimplePriorityQueue<GameObject, int>();
+
+        foreach (List<GameObject> row in nodesGrid) {
+            foreach (GameObject node in row) {
+                if (node.Equals(nodeInitial)) {
+                    node.GetComponent<Node>().SetDist(0);
+                }
+                unvisited.Enqueue(node, node.GetComponent<Node>().GetTotalDist());
+            }
+        }
+
+        GameObject nodeCurrent;
+        while (unvisited.Count > 0) {
+            nodeCurrent = unvisited.Dequeue();
+            minFoundDist = nodeCurrent.GetComponent<Node>().GetTotalDist();
+
+            if (nodeCurrent.Equals(nodeTarget)) {
+                isTargetFound = true;
+                break;
+            }
+
+            if (isVisualizing) yield return new WaitForSeconds(1 / iterationsPerSecond); // Delay for visual purposes
+            if (nodeCurrent == null) break; // Node can be destroyed during wait
+
+            if (minFoundDist == int.MaxValue) break; // Unsolvable graph! Dijkstra's algorithm requires path to target (Or graph is super massive, overflow)
+
+            if (nodeCurrent.GetComponent<Node>().GetPrev() && isVisualizing) DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
+            Node node = nodeCurrent.GetComponent<Node>();
+            node.SetIsFrontier(false);
+            foreach (GameObject neighbor in node.GetNeighbors()) {
+                Node nodeNeighbor = neighbor.GetComponent<Node>();
+                int nxtDist = node.GetTotalDist() + nodeNeighbor.GetWeight();
+                if (nxtDist < nodeNeighbor.GetTotalDist()) {
+                    nodeNeighbor.SetDist(nxtDist);
+                    nodeNeighbor.SetPrev(nodeCurrent);
+                    unvisited.UpdatePriority(neighbor, nxtDist);
+                    nodeNeighbor.SetIsFrontier(true); // Visual purpose
+                }
+            }
+            iterations++;
+        }
+        isFindingPaths = false;
+        yield return null;
+    }
+
+    // A* Search Algorithm (Informed Dijkstra's)
+    IEnumerator FindPathsAStar(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
+        isFindingPaths = true;
+        SimplePriorityQueue<GameObject, int> unvisited = new SimplePriorityQueue<GameObject, int>();
+
+        foreach (List<GameObject> row in nodesGrid) {
+            foreach (GameObject node in row) {
+                if (node.Equals(nodeInitial)) {
+                    node.GetComponent<Node>().SetDist(0);
+                }
+                unvisited.Enqueue(node, node.GetComponent<Node>().GetTotalDist());
+            }
+        }
+
+        GameObject nodeCurrent;
+        while (unvisited.Count > 0) {
+            nodeCurrent = unvisited.Dequeue();
+            minFoundDist = nodeCurrent.GetComponent<Node>().GetTotalDist();
+
+            if (nodeCurrent.Equals(nodeTarget)) {
+                isTargetFound = true;
+                break;
+            }
+
+            if (isVisualizing) yield return new WaitForSeconds(1 / iterationsPerSecond); // Delay for visual purposes
+            if (nodeCurrent == null) break; // Node can be destroyed during wait
+
+            if (minFoundDist == int.MaxValue) break; // Unsolvable graph! Dijkstra's algorithm requires path to target (Or graph is super massive, overflow)
+
+            if (nodeCurrent.GetComponent<Node>().GetPrev() && isVisualizing) DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
+            Node node = nodeCurrent.GetComponent<Node>();
+            node.SetIsFrontier(false);
+            foreach (GameObject neighbor in node.GetNeighbors()) {
+                Node nodeNeighbor = neighbor.GetComponent<Node>();
+                int nxtDist = node.GetTotalDist() + nodeNeighbor.GetWeight();
+                if (nxtDist < nodeNeighbor.GetTotalDist()) {
+                    nodeNeighbor.SetDist(nxtDist);
+                    nodeNeighbor.SetPrev(nodeCurrent);
+
+                    int priority = nxtDist + CalculateAStarHeuristic(neighbor.transform, nodeTarget.transform);
+                    unvisited.UpdatePriority(neighbor, priority);
+
+                    nodeNeighbor.SetIsFrontier(true); // Visual purpose
+                }
+            }
+            iterations++;
+        }
+        isFindingPaths = false;
+        yield return null;
+    }
+
+    int CalculateAStarHeuristic(Transform pos1, Transform pos2) {
+        //float md = Mathf.Abs(pos2.position.x - pos1.position.x) + Mathf.Abs(pos2.position.y - pos1.position.y); // Manhattan distance, good for 4 directions, no obstacles
+        float ed = Mathf.Sqrt(Mathf.Pow(pos2.position.x - pos1.position.x, 2) + Mathf.Pow(pos2.position.y - pos1.position.y, 2)); // Euclidean distance, good all-round
+        return (int) ed;
     }
 
     private void DrawLineVisitedPath(Vector3 start, Vector3 end) {
@@ -244,16 +348,6 @@ public class NodeManager : MonoBehaviour {
         //m.SetColor("_Color", new Color(0, 0.6f, 0, 1));
         lr.startColor = Color.black; lr.endColor = Color.black;
         lr.startWidth = 0.075f; lr.endWidth = 0.075f;
-        lr.SetPosition(0, start); lr.SetPosition(1, end);
-    }
-    private void DrawLineTentativePath(Vector3 start, Vector3 end) {
-        GameObject o = new GameObject("Line");
-        lines.Add(o);
-        LineRenderer lr = o.AddComponent<LineRenderer>();
-        Material m = new Material(Shader.Find("Unlit/Color"));
-        lr.material = m;
-        lr.startColor = Color.blue; lr.endColor = Color.blue;
-        lr.startWidth = 0.005f; lr.endWidth = 0.005f;
         lr.SetPosition(0, start); lr.SetPosition(1, end);
     }
     private void DrawLineTargetPath(Vector3 start, Vector3 end) {
@@ -295,6 +389,9 @@ public class NodeManager : MonoBehaviour {
     }
     public void SetIsVisualizing(bool v) {
         isVisualizing = v;
+    }
+    public void SetChosenAlgorithm(int v) {
+        chosenAlgorithm = v;
     }
 
 }
