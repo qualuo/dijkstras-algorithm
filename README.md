@@ -1,4 +1,4 @@
-# Pathfinding Visualization - Dijkstra's Algorithm
+# Pathfinding Visualization - Dijkstra's Algorithm & A*
 
 ### See it in action: https://qualuo.github.io/dijkstras-algorithm/
 
@@ -19,8 +19,9 @@ Dijkstra's algorithm is used in pathfinding to find the shortest path from one n
 6. For every neighbor (connected vertex) of 'current' node: if sum of 'distance' to the neighbor is less than the neighbor's current 'distance', save the smaller value (shorter distance), and set a pointer/reference to neighbor.
 7. Repeat from 4 until unvisited set is empty.
 
+A* simply adds heuristics onto Dijkstra's algorithm to find the desired target faster. In this case, the Euclidean distance is used.
 
-Or in code: 
+Looks something like this in code: 
 
         // Dijkstra's Shortest Path Algorithm implementation (no priority queue)
         void FindPathsDijkstra(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
