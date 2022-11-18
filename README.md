@@ -69,4 +69,8 @@ Looks something like this in code:
        
        
 ## Comments
-Dijkstra's algorithm was originally implemented with its simplest form, using a set. This could be made more efficient by using a priority queue (aka binary heap) to sort the frontier nodes for faster access. A* was also added because of its popularity and generally performs better than Dijkstra.
+Dijkstra's algorithm was originally implemented with its simplest form, using a set. This could be made more efficient by using a priority queue to sort the frontier nodes for faster access. Unity just so happens to include a version of C# that doesn't have priority queue support.
+
+A* was added because of its popularity and generally performing better than Dijkstra. The A* heuristic used is the Euclidean distance. 
+
+Making random scenarios took more than one would expect.
