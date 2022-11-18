@@ -8,14 +8,14 @@ public class CameraController : MonoBehaviour {
     public NodeManager observee;
     private float targetCoord;
 
-    private new Camera camera;
+    private Camera _camera; // Unity will complain using 'camera'
 
     public Button minusZoomButton;
     public Button plusZoomButton;
 
 
     void Start() {
-        camera = GetComponent<Camera>();
+        _camera = GetComponent<Camera>();
 
         if (minusZoomButton) {
             minusZoomButton.onClick.AddListener(delegate { ZoomOut(); });
@@ -26,10 +26,10 @@ public class CameraController : MonoBehaviour {
     }
 
     void ZoomOut() {
-        camera.orthographicSize += 5;
+        _camera.orthographicSize += 5;
     }
     void ZoomIn() {
-        camera.orthographicSize = Mathf.Max(5, camera.orthographicSize -= 5);
+        _camera.orthographicSize = Mathf.Max(5, _camera.orthographicSize -= 5);
 
 
     }
