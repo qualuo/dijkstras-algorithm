@@ -117,11 +117,11 @@ public class NodeManager : MonoBehaviour {
             for (int row = 0; row < gridSize; row++) {
                 Node n = nodes[col][row].GetComponent<Node>();
                 // 8-connectivity
-                if (col > 0 && row > 0) n.AddNeighbor(nodes[col - 1][row - 1]);   // Add left  below
+                if (col > 0 && row > 0) n.AddNeighbor(nodes[col - 1][row - 1]);   // Add left below
                 if (col > 0) n.AddNeighbor(nodes[col - 1][row]);   // Add left
-                if (col > 0 && row < gridSize - 1) n.AddNeighbor(nodes[col - 1][row + 1]);   // Add left  above
-                if (row > 0) n.AddNeighbor(nodes[col][row - 1]);   // Add       below
-                if (row < gridSize - 1) n.AddNeighbor(nodes[col][row + 1]);   // Add       above
+                if (col > 0 && row < gridSize - 1) n.AddNeighbor(nodes[col - 1][row + 1]);   // Add left above
+                if (row > 0) n.AddNeighbor(nodes[col][row - 1]);   // Add below
+                if (row < gridSize - 1) n.AddNeighbor(nodes[col][row + 1]);   // Add above
                 if (col < gridSize - 1 && row > 0) n.AddNeighbor(nodes[col + 1][row - 1]);   // Add right below
                 if (col < gridSize - 1) n.AddNeighbor(nodes[col + 1][row]);   // Add right
                 if (col < gridSize - 1 && row < gridSize - 1) n.AddNeighbor(nodes[col + 1][row + 1]);   // Add right above
@@ -133,10 +133,9 @@ public class NodeManager : MonoBehaviour {
         nodeInitial = nodes[Random.Range(0, gridSize)][Random.Range(0, gridSize)];
         nodeInitial.GetComponent<Node>().SetInitial();
         nodeTarget = nodeInitial;
-        if (nodeTarget.Equals(nodeInitial)) {
-            while (nodeTarget.Equals(nodeInitial)) { // Guarantee target is not same as initial
-                nodeTarget = nodes[Random.Range(0, gridSize)][Random.Range(0, gridSize)];
-            }
+        // Guarantee target is some distance away from starting point. Also ensures they are not the same.
+        while (Vector3.Distance(nodeTarget.gameObject.transform.position, nodeInitial.gameObject.transform.position) < gridSize / 3) {
+            nodeTarget = nodes[Random.Range(0, gridSize)][Random.Range(0, gridSize)];
         }
         nodeTarget.GetComponent<Node>().SetTarget();
         return true;
@@ -149,7 +148,7 @@ public class NodeManager : MonoBehaviour {
                 if (n.gameObject.Equals(nodeInitial) || n.gameObject.Equals(nodeTarget)) continue;
                 bool willKeep = difficulty > Random.Range(0,10) ? true : false; // Chance to be excluded 
                 if (!willKeep) {
-                    n.GetComponent<Node>().SetImpassableNode();
+                    //n.GetComponent<Node>().SetImpassableNode();
                     foreach (GameObject neighbor in n.GetNeighbors()) {
                         neighbor.GetComponent<Node>().GetNeighbors().Remove(n.gameObject);
                     }
@@ -164,9 +163,13 @@ public class NodeManager : MonoBehaviour {
         if (!isTargetFound) {
             //minFoundDist = int.MaxValue;
         } else if (isTargetFound) {
+            // Draw lines from target to initial node.
+
             List<GameObject> targetPath = new List<GameObject>();
+            
             GameObject p = nodeTarget.GetComponent<Node>().GetPrev();
-            DrawLineTargetPath(nodeTarget.transform.position, p.transform.position); // Vis
+            if (p != null) DrawLineTargetPath(nodeTarget.transform.position, p.transform.position); // Vis, edge case: target to first prev node
+            
             while (!p.Equals(nodeInitial)) {
                 targetPath.Add(p);
                 p.GetComponent<Node>().SetTargetPathNode();
@@ -285,7 +288,7 @@ public class NodeManager : MonoBehaviour {
     // A* Search Algorithm (Informed Dijkstra's)
     IEnumerator FindPathsAStar(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
         isFindingPaths = true;
-        SimplePriorityQueue<GameObject, int> unvisited = new SimplePriorityQueue<GameObject, int>();
+        SimplePriorityQueue<GameObject, float> unvisited = new SimplePriorityQueue<GameObject, float>();
 
         foreach (List<GameObject> row in nodesGrid) {
             foreach (GameObject node in row) {
@@ -321,8 +324,8 @@ public class NodeManager : MonoBehaviour {
                     nodeNeighbor.SetDist(nxtDist);
                     nodeNeighbor.SetPrev(nodeCurrent);
 
-                    int priority = nxtDist + CalculateAStarHeuristic(neighbor.transform, nodeTarget.transform);
-                    unvisited.UpdatePriority(neighbor, priority);
+                    float priority = nxtDist + CalculateAStarHeuristic(neighbor.transform, nodeTarget.transform);
+                    if (unvisited.Contains(neighbor)) unvisited.UpdatePriority(neighbor, priority);
 
                     nodeNeighbor.SetIsFrontier(true); // Visual purpose
                 }
@@ -333,10 +336,10 @@ public class NodeManager : MonoBehaviour {
         yield return null;
     }
 
-    int CalculateAStarHeuristic(Transform pos1, Transform pos2) {
+    float CalculateAStarHeuristic(Transform pos1, Transform pos2) {
         //float md = Mathf.Abs(pos2.position.x - pos1.position.x) + Mathf.Abs(pos2.position.y - pos1.position.y); // Manhattan distance, good for 4 directions, no obstacles
         float ed = Mathf.Sqrt(Mathf.Pow(pos2.position.x - pos1.position.x, 2) + Mathf.Pow(pos2.position.y - pos1.position.y, 2)); // Euclidean distance, good all-round
-        return (int) ed;
+        return ed;
     }
 
     private void DrawLineVisitedPath(Vector3 start, Vector3 end) {

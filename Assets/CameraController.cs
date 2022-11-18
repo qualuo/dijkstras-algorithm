@@ -8,7 +8,7 @@ public class CameraController : MonoBehaviour {
     public NodeManager observee;
     private float targetCoord;
 
-    private Camera camera;
+    private new Camera camera;
 
     public Button minusZoomButton;
     public Button plusZoomButton;
