@@ -2,7 +2,7 @@
 
 ### See it in action: https://qualuo.github.io/dijkstras-algorithm/
 
-Dijkstra's pathfinding algorithm implemented in Unity with C#. 
+Dijkstra's and A* pathfinding algorithm implemented in Unity with C#. 
 
 ## Visual
 * Graph consists of a weighted 8-connectivity grid. 
