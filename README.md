@@ -69,7 +69,7 @@ Looks something like this in code:
        
        
 ## Comments
-Dijkstra's algorithm was originally implemented with its simplest form, using a set. This could be made more efficient by using a priority queue to sort the frontier nodes for faster access. Unity just so happens to include a version of C# that doesn't have priority queue support.
+Dijkstra's algorithm was originally implemented with its simplest form, using a set. This was made more efficient by using a priority queue to sort the frontier nodes for faster access. Unity just so happens to include a version of C# that doesn't have priority queue support.
 
 A* was added because of its popularity and generally performing better than Dijkstra. The A* heuristic used is the Euclidean distance. 
 
