@@ -73,4 +73,4 @@ Dijkstra's algorithm was originally implemented with its simplest form, using a 
 
 A* was added because of its popularity and generally performing better than Dijkstra. The A* heuristic used is the Euclidean distance. 
 
-Making random scenarios took more than one would expect.
+Making random scenarios is more elaborate than one would expect.
