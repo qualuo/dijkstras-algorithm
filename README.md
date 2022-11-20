@@ -22,21 +22,19 @@ Dijkstra's and A* pathfinding algorithm implemented in Unity with C#.
 ## Algorithm
 
 Dijkstra's algorithm is used in pathfinding to find the shortest path from one node to every other node. These are the steps:
-1. Choose a starting node. This will be the first 'current' node. (Passed into function.)
-2. Add all graph nodes to a set. This set contains all 'unvisited' nodes.
-3. Set starting node's 'distance' to 0, and ∞ (represented with max value) for all others. This value ('distance') is the shortest distance to the node from starting node.
-4. Set the 'current' node to the one with lowest 'distance' in the 'unvisited' set.
-5. Remove 'current' node from set of 'unvisited' nodes.
-6. For every neighbor (connected vertex) of 'current' node: if sum of 'distance' to the neighbor is less than the neighbor's current 'distance', save the smaller value (shorter distance), and set a pointer/reference to neighbor.
+1. Choose a starting node. This will be the first `current` node. (Passed into function.)
+2. Add all graph nodes to a set. This set contains all `unvisited` nodes.
+3. Set starting node's `distance` to `0`, and `∞` (represented with max value) for all others. The `distance` is the shortest distance to the node from starting node.
+4. Set the `current` node to the one with lowest `distance` in the `unvisited` set.
+5. Remove `current` node from set of `unvisited` nodes.
+6. For every neighbor (connected vertex) of `current` node: if sum of `distance` to the neighbor is less than the neighbor's current `distance`, save the smaller value (shorter distance), and set a pointer/reference to neighbor.
 7. Repeat from 4 until unvisited set is empty.
 
-A* simply adds heuristics onto Dijkstra's algorithm to find the desired target faster. In this case, the Euclidean distance is used.
-
 Looks something like this in code: 
-
+``` C#
         // Dijkstra's Shortest Path Algorithm implementation (no priority queue)
         void FindPathsDijkstra(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
-          HashSet<GameObject> unvisited = new HashSet<GameObject>();
+            HashSet<GameObject> unvisited = new HashSet<GameObject>();
 
           foreach (List<GameObject> row in nodesGrid) {
               foreach (GameObject node in row) {
@@ -77,11 +75,46 @@ Looks something like this in code:
               }
           }
        }
+```
        
-       
-## Comments
+## Comments 
+
 Dijkstra's algorithm was originally implemented with its simplest form, using a set. This was made more efficient by using a priority queue to sort the frontier nodes for faster access. Unity just so happens to include a version of C# that doesn't have priority queue support.
 
-A* was added because of its popularity and generally performing better than Dijkstra. The A* heuristic used is the Euclidean distance. 
+The change from using a set to using a priority queue is in step 4 and 6 — finding the lowest 'distance' node by: iterating through all unvisited nodes, O(n) at step 4, versus dequeue first element, O(1), at step 4 and updating priority, O(log n), at step 6.
+
+A* was added because of its popularity and generally performing better than Dijkstra. A* simply adds heuristics onto Dijkstra's algorithm to find the desired target faster. The A* heuristic used is the Euclidean distance. 
 
 Making random scenarios is more elaborate than one would expect.
+
+## Ideas
+
+Since this is a 3D project, it is simple to extend the visualization to the third dimension by adding another dimension and add more neighbors to every node (from 8-connectivity to 9+8+9=26). The bigger task however, is creating a good user experience along with it.
+
+Applying this grid-based pathfinding in a non-discrete 2D or 3D world can be achieved by something along these lines, first assuming we are only navigating ground:
+1. Choose a starting node.
+    * That is — find any point on the ground.
+2. Add all graph nodes to a set.
+    * This is easier said than done (as is everything else), but what we can do is: 
+        * From the starting point, traverse a `step` distance in every direction, along the ground. 
+        * Every step is checked to not collide with anything. If nothing is in the way, then this is a neighbor, aka accessible point. Repeat this for every neighbor             until all accessible points have been found. 
+        * We have now constructed the graph in the form of a navigation grid, and our initial 'unvisited' set. *From here we can procede with the pathfinding algorithm           as usual.*  
+3. Set starting node's `distance` to `0`, and `∞` (represented with max value) for all others.
+4. Set the `current` node to the one with lowest `distance` in the `unvisited` set.
+5. Remove `current` node from set of `unvisited` nodes.
+6. For every neighbor (connected vertex) of `current` node: if sum of `distance` to the neighbor is less than the neighbor's current `distance`, save the smaller value (shorter distance), and set a pointer/reference to neighbor.
+7. Repeat from 4 until unvisited set is empty.
+
+And so we can now get to any other point from the single starting point!
+
+* This whole process can be applied to every node, which will result in knowing the shortest path to any point, **from any point**.
+* If the ground and obstacles don't change (they are static), then reconstructing the graph every time is not necessary and would be done beforehand so it only needs to be done once.
+* Navigation becomes more complex by adding movement in the third dimension:
+    * Jumping
+        * For this, the previously ground-conforming grid will have to be extended upwards based on jump height and outwards based on movement speed. Higher levels and           points across gaps become part of the navigation grid.
+        * The cheaper way of handling this, is manually connecting pairs of points as traversable gaps.
+    * Falling — Dropping down from ledges.
+    * Gliding — Falling while moving forward at the same time, a slanted extension of the grid.
+    * Climbing — Extending navigation grid upwards along vertical shapes, walls. 
+    * Flying — Lots of variation in flight movement.
+* And then there's performance...
