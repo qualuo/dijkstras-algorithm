@@ -96,9 +96,10 @@ Applying this grid-based pathfinding in a non-discrete 2D or 3D world can be ach
     * That is — find any point on the ground.
 2. Add all graph nodes to a set.
     * This is easier said than done (as is everything else), but what we can do is: 
-        * From the starting point, traverse a `step` distance in every direction, along the ground. 
+        * From the starting point, traverse a `step` distance for every direction, along the ground. 
         * Every step is checked to not collide with anything. If nothing is in the way, then this is a neighbor, aka accessible point. Repeat this for every neighbor             until all accessible points have been found. 
-        * We have now constructed the graph in the form of a navigation grid, and our initial 'unvisited' set. *From here we can procede with the pathfinding algorithm           as usual.*  
+        * We have now constructed the graph in the form of a navigation grid, and have the initial 'unvisited' set. 
+        * From here we can procede with the pathfinding algorithm as usual.
 3. Set starting node's `distance` to `0`, and `∞` (represented with max value) for all others.
 4. Set the `current` node to the one with lowest `distance` in the `unvisited` set.
 5. Remove `current` node from set of `unvisited` nodes.
