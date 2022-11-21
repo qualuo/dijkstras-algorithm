@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class Node : MonoBehaviour {
 
-    public bool isWeightRandom;
-    public int weight;
+    private bool isWeightRandom;         // True will randomize weightMax
+    private int weight;                  // Set weight
+    private int weightMax;               // Max allowed weight
 
-    private List<GameObject> neighbors; // Connected nodes/vertices
-    public GameObject prev;             // Previous node on path to target
-    private int dist;                   // Cost/distance to reach this node
+    private List<GameObject> neighbors;  // Connected nodes/vertices
+    private GameObject prev;             // Previous node on path to target
+    private int dist;                    // Cost/distance to reach this node
     private bool isColorable;
-    private bool isFrontier;            // True if node is a neighbor but not yet visited
-    private int weightMax;
+    private bool isFrontier;             // True if node is a neighbor but not yet visited
 
     void Start() {
         if (isWeightRandom) {

@@ -5,13 +5,16 @@ using UnityEngine.UI;
 
 public class CameraController : MonoBehaviour {
 
-    public NodeManager observee;
+    [SerializeField]
+    private NodeManager observee;
     private float targetCoord;
 
     private Camera _camera; // Unity will complain using 'camera'
 
-    public Button minusZoomButton;
-    public Button plusZoomButton;
+    [SerializeField]
+    private Button minusZoomButton;
+    [SerializeField]
+    private Button plusZoomButton;
 
 
     void Start() {

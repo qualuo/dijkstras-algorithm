@@ -4,7 +4,8 @@ using UnityEngine;
 using Priority_Queue;
 
 public class NodeManager : MonoBehaviour {
-    public GameObject nodePrefab;           // Node used in graph
+    [SerializeField]
+    private GameObject nodePrefab;           // Node object used in graph
 
     private int gridSize;                   // Square grid/graph
     private bool isVisualizing;             // 

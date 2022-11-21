@@ -7,30 +7,47 @@ using UnityEngine.Events;
 
 public class UIController : MonoBehaviour {
 
-    public Toggle playToggle;
+    [SerializeField]
+    private Toggle playToggle;
 
-    public Slider gridSizeSlider;
-    public UnityEvent<int> gridSizeSliderEvent;
+    [SerializeField]
+    private Slider gridSizeSlider;
+    [SerializeField]
+    private UnityEvent<int> gridSizeSliderEvent;
 
-    public Slider iterationSpeedSlider;
-    public UnityEvent<int> iterationSpeedSliderEvent;
+    [SerializeField]
+    private Slider iterationSpeedSlider;
+    [SerializeField]
+    private UnityEvent<int> iterationSpeedSliderEvent;
 
-    public Toggle visToggle;
-    public UnityEvent<bool> visToggleEvent;
+    [SerializeField]
+    private Toggle visToggle;
+    [SerializeField]
+    private UnityEvent<bool> visToggleEvent;
 
-    public TMP_Dropdown algoDropdown;
-    public UnityEvent<int> algoDropdownEvent;
+    [SerializeField]
+    private TMP_Dropdown algoDropdown;
+    [SerializeField]
+    private UnityEvent<int> algoDropdownEvent;
 
-    public Toggle randomWeightsToggle;
-    public UnityEvent<bool> randomWeightsToggleEvent;
+    [SerializeField]
+    private Toggle randomWeightsToggle;
+    [SerializeField]
+    private UnityEvent<bool> randomWeightsToggleEvent;
 
 
-    public NodeManager nodeManager;
-    public TextMeshProUGUI playTMP;
-    public TextMeshProUGUI distanceTMP;
-    public TextMeshProUGUI iterationsTMP;
-    public TextMeshProUGUI iterationsPSTMP;
-    public TextMeshProUGUI gridSizeTMP;
+    [SerializeField]
+    private NodeManager nodeManager;
+    [SerializeField]
+    private TextMeshProUGUI playTMP;
+    [SerializeField]
+    private TextMeshProUGUI distanceTMP;
+    [SerializeField]
+    private TextMeshProUGUI iterationsTMP;
+    [SerializeField]
+    private TextMeshProUGUI iterationsPSTMP;
+    [SerializeField]
+    private TextMeshProUGUI gridSizeTMP;
 
     void Start() {
 
