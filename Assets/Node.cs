@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Node : MonoBehaviour {
 
+    [SerializeField]
     private bool isWeightRandom;         // True will randomize weightMax
     private int weight;                  // Set weight
     private int weightMax;               // Max allowed weight

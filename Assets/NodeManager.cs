@@ -18,10 +18,13 @@ public class NodeManager : MonoBehaviour {
     private GameObject nodeTarget;          // End node
 
     private bool isRoundInProgress;         // A round is a whole beginning to end, after is the reset phase
+    private float inProgressTime;           // Duration of current search
+
+    private bool isGraphValid;              // 
     private bool isFindingPaths;            // True while algorithm is running
     private bool isTargetFound;             // True when algorithm has found target
+
     private float colorUpdateTime;          // Color update interval
-    private float inProgressTime;           // Duration of current search
     private int minFoundDist;               // Shortest distance of visited nodes so far (used for animation)
     private int iterations;             
 
@@ -31,21 +34,35 @@ public class NodeManager : MonoBehaviour {
 
         nodes = new List<List<GameObject>>();
         lines = new List<GameObject>();
+        nodeInitial = null;
+        nodeTarget = null;
 
-        isTargetFound = false;
-        colorUpdateTime = 0;
+        isRoundInProgress = true;
         inProgressTime = 0;
+
+        isGraphValid = false;
+        isFindingPaths = false;
+        isTargetFound = false;
+
+        colorUpdateTime = 0;
         minFoundDist = 0;
         iterations = 0;
 
-        isRoundInProgress = true;
-        StartCoroutine(StartRound());
+        StartCoroutine(RunRound());
     }
-    IEnumerator StartRound() {
+    IEnumerator RunRound() {
         yield return new WaitUntil(SetupGrid);
         yield return new WaitUntil(PopulateNeighbors);
         yield return new WaitUntil(SetupStartEndNodes);
-        yield return new WaitUntil(DeleteRandomNeighbors);
+        yield return new WaitUntil(DeleteRandomNodes);
+
+        yield return new WaitUntil(ValidatePathExists);
+        if (!isGraphValid) {
+            StartCoroutine(RestartAfterSeconds(0));
+            yield break;
+        }
+
+        isFindingPaths = true;
         if (chosenAlgorithm == 0)
             StartCoroutine(FindPathsDijkstrasPriorityQueue(nodes, nodeInitial));
         else if (chosenAlgorithm == 1)
@@ -53,11 +70,11 @@ public class NodeManager : MonoBehaviour {
         while (isFindingPaths) {
             yield return null;
         }
-        PostSearch();
+
+        RunPostSearch();
     }
 
     void Update() {
-
         float delta = Time.deltaTime;
         if (isVisualizing) {
             colorUpdateTime -= delta;
@@ -82,24 +99,6 @@ public class NodeManager : MonoBehaviour {
             }
         }
         yield return null;
-    }
-
-    IEnumerator RestartAfterSeconds(float time) {
-        isRoundInProgress = false;
-        isTargetFound = false;
-        StartCoroutine(UpdateNodeColors());
-
-        yield return new WaitForSeconds(time);
-
-        foreach (List<GameObject> row in nodes) {
-            foreach (GameObject node in row) {
-                Destroy(node);
-            }
-        }
-        foreach(GameObject o in lines) {
-            Destroy(o);
-        }
-        Start();
     }
 
     bool SetupGrid() {
@@ -141,7 +140,7 @@ public class NodeManager : MonoBehaviour {
         nodeTarget.GetComponent<Node>().SetTarget();
         return true;
     }
-    bool DeleteRandomNeighbors() {
+    bool DeleteRandomNodes() {
         int difficulty = Random.Range(4,10); // Random exclusion threshold
         for (int col = gridSize - 1; col >= 0; col--) {
             for (int row = gridSize - 1; row >= 0; row--) {
@@ -160,17 +159,40 @@ public class NodeManager : MonoBehaviour {
         }
         return true;
     }
-    void PostSearch() {
+    bool ValidatePathExists() {
+        // Iterative Depth First Search
+        HashSet<GameObject> visited = new HashSet<GameObject>();
+        Stack<GameObject> stack = new Stack<GameObject>();
+
+        stack.Push(nodeInitial);
+
+        while (stack.Count > 0) {
+            GameObject currentNode = stack.Pop();
+            if (currentNode == nodeTarget) {
+                isGraphValid = true;
+                return true;
+            }
+
+            visited.Add(currentNode);
+
+            foreach (GameObject neighbor in currentNode.GetComponent<Node>().GetNeighbors()) {
+                if (!visited.Contains(neighbor)) stack.Push(neighbor);
+            }
+        }
+        isGraphValid = false;
+        return true;
+    }
+    void RunPostSearch() {
         if (!isTargetFound) {
-            //minFoundDist = int.MaxValue;
+
         } else if (isTargetFound) {
             // Draw lines from target to initial node.
 
             List<GameObject> targetPath = new List<GameObject>();
-            
+
             GameObject p = nodeTarget.GetComponent<Node>().GetPrev();
             if (p != null) DrawLineTargetPath(nodeTarget.transform.position, p.transform.position); // Vis, edge case: target to first prev node
-            
+
             while (!p.Equals(nodeInitial)) {
                 targetPath.Add(p);
                 p.GetComponent<Node>().SetTargetPathNode();
@@ -180,10 +202,26 @@ public class NodeManager : MonoBehaviour {
         }
         StartCoroutine(RestartAfterSeconds(5));
     }
+    IEnumerator RestartAfterSeconds(float time) {
+        isRoundInProgress = false;
+        isTargetFound = false;
+        StartCoroutine(UpdateNodeColors());
+
+        yield return new WaitForSeconds(time);
+
+        foreach (List<GameObject> row in nodes) {
+            foreach (GameObject node in row) {
+                Destroy(node);
+            }
+        }
+        foreach (GameObject o in lines) {
+            Destroy(o);
+        }
+        Start(); // Loop
+    }
 
     // Dijkstra's Shortest Path Algorithm
     IEnumerator FindPathsDijkstras(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
-        isFindingPaths = true;
         HashSet<GameObject> unvisited = new HashSet<GameObject>();
 
         foreach (List<GameObject> row in nodesGrid) {
@@ -217,8 +255,6 @@ public class NodeManager : MonoBehaviour {
             if (isVisualizing) yield return new WaitForSeconds(1 / iterationsPerSecond); // Delay for visual purposes
             if (nodeCurrent == null) break; // Node can be destroyed during wait
 
-            if (min == int.MaxValue) break; // Unsolvable graph! Dijkstra's algorithm requires path to target (Or graph is super massive, overflow)
-
             if (nodeCurrent.GetComponent<Node>().GetPrev() && isVisualizing) DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
             Node node = nodeCurrent.GetComponent<Node>();
             node.SetIsFrontier(false);
@@ -240,7 +276,6 @@ public class NodeManager : MonoBehaviour {
 
     // Dijkstra's Shortest Path Algorithm using Priority Queue
     IEnumerator FindPathsDijkstrasPriorityQueue(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
-        isFindingPaths = true;
         SimplePriorityQueue<GameObject, int> unvisited = new SimplePriorityQueue<GameObject, int>();
 
         foreach (List<GameObject> row in nodesGrid) {
@@ -265,8 +300,6 @@ public class NodeManager : MonoBehaviour {
             if (isVisualizing) yield return new WaitForSeconds(1 / iterationsPerSecond); // Delay for visual purposes
             if (nodeCurrent == null) break; // Node can be destroyed during wait
 
-            if (minFoundDist == int.MaxValue) break; // Unsolvable graph! Dijkstra's algorithm requires path to target (Or graph is super massive, overflow)
-
             if (nodeCurrent.GetComponent<Node>().GetPrev() && isVisualizing) DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
             Node node = nodeCurrent.GetComponent<Node>();
             node.SetIsFrontier(false);
@@ -288,7 +321,6 @@ public class NodeManager : MonoBehaviour {
 
     // A* Search Algorithm (Informed Dijkstra's)
     IEnumerator FindPathsAStar(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
-        isFindingPaths = true;
         SimplePriorityQueue<GameObject, float> unvisited = new SimplePriorityQueue<GameObject, float>();
 
         foreach (List<GameObject> row in nodesGrid) {
@@ -313,8 +345,6 @@ public class NodeManager : MonoBehaviour {
             if (isVisualizing) yield return new WaitForSeconds(1 / iterationsPerSecond); // Delay for visual purposes
             if (nodeCurrent == null) break; // Node can be destroyed during wait
 
-            if (minFoundDist == int.MaxValue) break; // Unsolvable graph! Dijkstra's algorithm requires path to target (Or graph is super massive, overflow)
-
             if (nodeCurrent.GetComponent<Node>().GetPrev() && isVisualizing) DrawLineVisitedPath(nodeCurrent.transform.position, nodeCurrent.GetComponent<Node>().GetPrev().transform.position); // Visual
             Node node = nodeCurrent.GetComponent<Node>();
             node.SetIsFrontier(false);
@@ -337,7 +367,7 @@ public class NodeManager : MonoBehaviour {
         yield return null;
     }
 
-    float CalculateAStarHeuristic(Transform pos1, Transform pos2) {
+    private float CalculateAStarHeuristic(Transform pos1, Transform pos2) {
         //float md = Mathf.Abs(pos2.position.x - pos1.position.x) + Mathf.Abs(pos2.position.y - pos1.position.y); // Manhattan distance, good for 4 directions, no obstacles
         float ed = Mathf.Sqrt(Mathf.Pow(pos2.position.x - pos1.position.x, 2) + Mathf.Pow(pos2.position.y - pos1.position.y, 2)); // Euclidean distance, good all-round
         return ed;
