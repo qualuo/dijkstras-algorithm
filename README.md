@@ -83,7 +83,7 @@ Dijkstra's algorithm was originally implemented with its simplest form, using a 
 
 The change from using a set to using a priority queue is in step 4 and 6 — finding the lowest 'distance' node by: iterating through all unvisited nodes, O(n) at step 4, versus dequeue first element, O(1), at step 4 and updating priority, O(log n), at step 6.
 
-A* was added because of its popularity and generally performing better than Dijkstra. A* simply adds heuristics onto Dijkstra's algorithm to find the desired target faster. The A* heuristic used is the Euclidean distance. 
+A* was added because of its popularity and generally performing better than Dijkstra. A* is simply put Dijkstra's but informed. It adds heuristics to find the desired target faster. The A* heuristic used here is the Euclidean distance. 
 
 Making random scenarios by removing random nodes opened up the possibility of fragmented graphs within the grid. Dijkstra's algorithm can not tell if there is a path or not to the destination, so to remedy this validation was added with depth-first search. Breadth-first search is also an alternative.
 
