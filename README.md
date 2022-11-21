@@ -85,7 +85,7 @@ The change from using a set to using a priority queue is in step 4 and 6 — fin
 
 A* was added because of its popularity and generally performing better than Dijkstra. A* simply adds heuristics onto Dijkstra's algorithm to find the desired target faster. The A* heuristic used is the Euclidean distance. 
 
-Making random scenarios is more elaborate than one would expect.
+Making random scenarios by removing random nodes opened up the possibility of fragmented graphs within the grid. Dijkstra's algorithm can not tell if there is a path or not to the destination, so to remedy this validation was added with depth-first search. Breadth-first search is also an alternative.
 
 ## Ideas
 
