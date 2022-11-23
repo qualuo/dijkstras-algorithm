@@ -31,7 +31,7 @@ Dijkstra's algorithm is used in pathfinding to find the shortest path from one n
 6. For every neighbor (connected vertex) of `current` node: if sum of `distance` to the neighbor is less than the neighbor's current `distance`, save the smaller value (shorter distance), and set a pointer/reference to neighbor.
 7. Repeat from 4 until unvisited set is empty.
 
-Looks something like this in code: 
+Looks along the lines of this in code: 
 ``` C#
         // Dijkstra's Shortest Path Algorithm implementation (no priority queue)
         void FindPathsDijkstra(List<List<GameObject>> nodesGrid, GameObject nodeInitial) {
@@ -118,5 +118,3 @@ And so we can now get to any other point from the single starting point!
     * Falling — Dropping down from ledges.
     * Gliding — Falling while moving forward at the same time, a slanted extension of the grid.
     * Climbing — Extending navigation grid upwards along vertical shapes, walls. 
-    * Flying — Lots of variation in flight movement.
-* And then there's performance...
