@@ -11,9 +11,10 @@ Dijkstra's and A* pathfinding algorithm implemented in Unity with C#.
 * Blue nodes are the frontier/open/tentative nodes (that have a preliminary shortest distance). 
 * Node size indicates weight (smaller = shorter). Size is relative.
 * Longer paths are darker, while short and easy paths are brighter. Shade is relative.
-* White lines show the shortest path to any node from the starting node. 
+* White lines show the shortest path to any node from the starting node. (Shortest-path tree)
 * Random nodes are removed from the grid. 
 * New scenarios are procedurally generated.
+* The option to randomize weights will create more varied scenarios than uniform grid.
 
 <p align="center">
   <img src="./Images/pathfinding.gif" alt="Showcase"/>
