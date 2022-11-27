@@ -10,6 +10,7 @@ Dijkstra's and A* pathfinding algorithm implemented in Unity with C#.
 * Green (the brightest one) is starting point. 
 * Green nodes are the visited nodes. Their shortest distance have been found.
 * Blue nodes are the frontier/open/tentative nodes. They have a preliminary shortest distance. 
+* White nodes are the unvisited nodes. Their shortest distance is ∞.
 * Node size indicates weight (smaller = shorter). Size is relative.
 * Longer paths are darker, while shorter paths are brighter. Shade is relative.
 * White lines show the shortest path to any node from the starting node. (Shortest-path tree)
