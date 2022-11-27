@@ -8,9 +8,10 @@ Dijkstra's and A* pathfinding algorithm implemented in Unity with C#.
 * Graph consists of a weighted 8-connectivity grid. 
 * Red is the target. 
 * Green (the brightest one) is starting point. 
-* Blue nodes are the frontier/open/tentative nodes (that have a preliminary shortest distance). 
+* Green nodes are the visited nodes. Their shortest distance have been found.
+* Blue nodes are the frontier/open/tentative nodes. They have a preliminary shortest distance. 
 * Node size indicates weight (smaller = shorter). Size is relative.
-* Longer paths are darker, while short and easy paths are brighter. Shade is relative.
+* Longer paths are darker, while shorter paths are brighter. Shade is relative.
 * White lines show the shortest path to any node from the starting node. (Shortest-path tree)
 * Random nodes are removed from the grid. 
 * New scenarios are procedurally generated.
