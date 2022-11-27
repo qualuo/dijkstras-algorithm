@@ -120,3 +120,5 @@ And so we can now get to any other point from the single starting point!
     * Falling — Dropping down from ledges.
     * Gliding — Falling while moving forward at the same time, a slanted extension of the grid.
     * Climbing — Extending navigation grid upwards along vertical shapes, walls. 
+* Even more so when considering the constraints, that is physical dimensions of the agent.
+* As well as considering the effort of traversing with specific methods. E.g. traveling upwards against gravity, is more troublesome than downwards with gravity.
